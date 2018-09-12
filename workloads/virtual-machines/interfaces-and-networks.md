@@ -18,19 +18,16 @@ All possible configuration options are available in the
 [Interface API Reference](https://kubevirt.io/api-reference/master/definitions.html#_v1_interface)
 and [Network API Reference](https://kubevirt.io/api-reference/master/definitions.html#_v1_network).
 
-> **Note:** Currently, the only supported network type is `pod`.
-
 ## Backend
 
 Network backends are configured in `spec.networks`. A network must have a
 unique name. Additional fields declare which logical or physical device the
 network relates to.
 
+### Pod
+
 A `pod` network represents the default pod `eth0` interface configured by
 cluster SDN solution that is present in each pod.
-
-> **Note:** Currently, the only supported network type is `pod`. In the future,
-> more network types may be supported.
 
 ```yaml
 kind: VM
@@ -46,6 +43,29 @@ spec:
   networks:
   - name: red
     pod: {} # Stock pod network
+```
+
+### Multus
+A `multus` network represent the usage of the [MULTUS cni plugin](https://github.com/intel/multus-cni)
+`networkName` represent a specific references to a NetworkAttachmentDefinition CRD object in the same namespace.
+
+> **Note:** Multus and the relevant cni plugins components should already be installed in the system before starting a vmi.
+
+```yaml
+kind: VM
+spec:
+  domain:
+    devices:
+      interfaces:
+        - name: red
+          macAddress: de:ad:00:00:be:af
+          model: e1000
+          pciAddress: 0000:81:00.1
+          bridge: {}
+  networks:
+  - name: red
+    multus:
+     networkName: bridge-red-net
 ```
 
 ## Frontend
